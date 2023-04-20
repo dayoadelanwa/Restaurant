@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace Mango.Services.OrderAPI.Messaging
+namespace Mango.Services.Email.Messaging
 {
     public class AzureServiceBusConsumer : IAzureServiceBusConsumer
     {
