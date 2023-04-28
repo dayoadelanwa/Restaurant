@@ -3,9 +3,6 @@ using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
-
-
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -15,11 +12,28 @@ builder.Services.AddAuthentication("Bearer")
         {
             ValidateAudience = false
         };
-        builder.Services.AddOcelot();
     });
+
+    builder.Services.AddOcelot();
+
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.AddPolicy("ApiScope", policy =>
+//    {
+//        policy.RequireAuthenticatedUser();
+//        policy.RequireClaim("scope", "mango");
+//    });
+//});
+
+var app = builder.Build();
+
+
+
 
 
 app.MapGet("/", () => "Hello World!");
 
+app.UseAuthentication();
+//app.UseAuthorization();
 app.UseOcelot();
 app.Run();
