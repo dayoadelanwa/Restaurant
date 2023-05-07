@@ -104,30 +104,31 @@ namespace Mango.Web.Controllers
             return View();
         }
 
-        public async Task<CartDto> LoadCartDtoBasedOnLoggedInUser()
+        private async Task<CartDto> LoadCartDtoBasedOnLoggedInUser()
         {
             var userId = User.Claims.Where(u => u.Type == "sub")?.FirstOrDefault()?.Value;
             var accessToken = await HttpContext.GetTokenAsync("access_token");
             var response = await _cartService.GetCartByUserIdAsync<ResponseDto>(userId, accessToken);
 
             CartDto cartDto = new();
-            if(response!= null && response.IsSuccess)
+            if (response != null && response.IsSuccess)
             {
                 cartDto = JsonConvert.DeserializeObject<CartDto>(Convert.ToString(response.Result));
             }
 
-            if(cartDto.CartHeader != null)
+            if (cartDto.CartHeader != null)
             {
-                if(!string.IsNullOrEmpty(cartDto.CartHeader.CouponCode))
+                if (!string.IsNullOrEmpty(cartDto.CartHeader.CouponCode))
                 {
-                    var coupon = await _couponService.GetCoupon<ResponseDto>(cartDto.CartHeader.CouponCode,accessToken);
-                    if(coupon != null && coupon.IsSuccess)
+                    var coupon = await _couponService.GetCoupon<ResponseDto>(cartDto.CartHeader.CouponCode, accessToken);
+                    if (coupon != null && coupon.IsSuccess)
                     {
                         var couponObj = JsonConvert.DeserializeObject<CouponDto>(Convert.ToString(coupon.Result));
                         cartDto.CartHeader.DiscountTotal = couponObj.DiscountAmount;
                     }
                 }
-                foreach(var detail in cartDto.CartDetails)
+
+                foreach (var detail in cartDto.CartDetails)
                 {
                     cartDto.CartHeader.OrderTotal += (detail.Product.Price * detail.Count);
                 }

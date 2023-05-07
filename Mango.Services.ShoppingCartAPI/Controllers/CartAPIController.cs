@@ -2,6 +2,7 @@
 using Mango.Services.ShoppingCartAPI.Messages;
 using Mango.Services.ShoppingCartAPI.Models;
 using Mango.Services.ShoppingCartAPI.Models.Dto;
+using Mango.Services.ShoppingCartAPI.RabbitMQSender;
 using Mango.Services.ShoppingCartAPI.Repository;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,13 +16,14 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         private readonly ICouponRepository _couponRepository;
         protected ResponseDto _response;
         private readonly IMessageBus _messageBus;
-
-        public CartAPIController(ICartRepository cartRepository, IMessageBus messageBus, ICouponRepository couponRepository)
+        private readonly IRabbitMQCartMessageSender _rabbitMQCartMessageSender;
+        public CartAPIController(ICartRepository cartRepository, IMessageBus messageBus, ICouponRepository couponRepository, IRabbitMQCartMessageSender rabbitMQCartMessageSender)
         {
             _cartRepository = cartRepository;
             _couponRepository = couponRepository;
             this._response = new ResponseDto();
             _messageBus = messageBus;
+            _rabbitMQCartMessageSender = rabbitMQCartMessageSender;
         }
 
         [HttpGet("GetCart/{userId}")]
@@ -129,7 +131,10 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
 
                 checkoutHeader.CartDetails = cartDto.CartDetails;
                 //logic to adde message to process order
-                await _messageBus.PublishMessage(checkoutHeader, "checkoutqueue");
+                //await _messageBus.PublishMessage(checkoutHeader, "checkoutqueue");
+
+                //rabbitMQ
+                _rabbitMQCartMessageSender.SendMessage(checkoutHeader, "checkoutqueue");
                 await _cartRepository.ClearCart(checkoutHeader.UserId);
 
             }
