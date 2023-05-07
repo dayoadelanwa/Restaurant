@@ -3,16 +3,17 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System.Text;
 
-namespace Mango.Services.ShoppingCartAPI.RabbitMQSender
+namespace Mango.Services.PaymentAPI.RabbitMQSender
 {
-    public class RabbitMQCartMessageSender : IRabbitMQCartMessageSender
+    public class RabbitMQPaymentMessageSender : IRabbitMQPaymentMessageSender
     {
         private readonly string _hostname;
         private readonly string _password;
         private readonly string _username;
         private IConnection _connection;
+        private const string ExchangeName = "PublishSubscribePaymentUpdate_Exchange";
 
-        public RabbitMQCartMessageSender()
+        public RabbitMQPaymentMessageSender()
         {
             _hostname= "localhost";
             _password= "guest";
@@ -23,10 +24,12 @@ namespace Mango.Services.ShoppingCartAPI.RabbitMQSender
             if (ConnectionExists())
             {
                 using var channel = _connection.CreateModel();
-                channel.QueueDeclare(queue: queueName, false, false, false, arguments: null);
+                channel.ExchangeDeclare(ExchangeName, ExchangeType.Fanout, durable: false);
+                //channel.QueueDeclare(queue: queueName, false, false, false, arguments: null);
                 var json = JsonConvert.SerializeObject(baseMessage);
                 var body = Encoding.UTF8.GetBytes(json);
-                channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: null, body: body);
+                //channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: null, body: body);
+                channel.BasicPublish(exchange: ExchangeName, "", basicProperties: null, body: body);
             }
         }
 
