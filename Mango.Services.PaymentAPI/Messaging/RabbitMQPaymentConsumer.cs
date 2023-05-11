@@ -47,7 +47,7 @@ namespace Mango.Services.PaymentAPI.Messaging
 
                 _channel.BasicAck(ea.DeliveryTag, false);
             };
-            _channel.BasicConsume("checkoutqueue", false, consumer);
+            _channel.BasicConsume("orderpaymentprocesstopic", false, consumer);
 
             return Task.CompletedTask;
         }
@@ -66,6 +66,7 @@ namespace Mango.Services.PaymentAPI.Messaging
 
             try
             {
+
                 //await _messageBus.PublishMessage(updatePaymentResultMessage, orderupdatepaymentresulttopic);
                 //await args.CompleteMessageAsync(args.Message);
             }

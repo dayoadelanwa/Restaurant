@@ -19,7 +19,7 @@ namespace Mango.Services.PaymentAPI.RabbitMQSender
             _password= "guest";
             _username= "guest";
         }
-        public void SendMessage(BaseMessage baseMessage, string queueName)
+        public void SendMessage(BaseMessage baseMessage)
         {
             if (ConnectionExists())
             {
